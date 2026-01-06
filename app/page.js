@@ -1,63 +1,191 @@
-import Image from "next/image";
+"use client";
+
+import { useState } from "react";
+import StatusChip from "./components/StatusChip";
+
+const mockEvidence = [
+  {
+    id: 1,
+    name: "ISO Certificate",
+    type: "ISO",
+    status: "Active",
+    expiry: "2026-05-20",
+    versions: 3,
+    updatedAt: "2025-12-01",
+  },
+  {
+    id: 2,
+    name: "Factory License",
+    type: "License",
+    status: "Expired",
+    expiry: "2024-11-10",
+    versions: 1,
+    updatedAt: "2024-10-15",
+  },
+
+  {
+    id: 3,
+    name: "Fire Safety Certificate",
+    type: "Safety",
+    status: "Expired",
+    expiry: "2025-09-30",
+    versions: 2,
+    updatedAt: "2025-02-18",
+  },
+  {
+    id: 4,
+    name: "Annual Compliance Audit Report",
+    type: "Audit",
+    status: "Active",
+    expiry: "2026-03-15",
+    versions: 1,
+    updatedAt: "2025-01-22",
+  },
+];
 
 export default function Home() {
+  const [selectedIds, setSelectedIds] = useState([]);
+  const [search, setSearch] = useState("");
+  const [filter, setFilter] = useState("all");
+  const [docType, setDocType] = useState("all");
+
+  const selectedAll =
+    selectedIds.length == mockEvidence.length && mockEvidence.length > 0;
+
+  const toggleAll = () => {
+    if (selectedAll) {
+      setSelectedIds([]);
+    } else {
+      setSelectedIds(mockEvidence.map((item) => item.id));
+    }
+  };
+
+  const toggleOne = (id) => {
+    setSelectedIds((selectedIds) => {
+      if (selectedIds.includes(id)) {
+        return selectedIds.filter((selectedId) => selectedId !== id);
+      }
+      return [...selectedIds, id];
+    });
+  };
+
+  const filteredEvidence = mockEvidence.filter((item) => {
+    const matchesSearch = item.name
+      .toLowerCase()
+      .startsWith(search.toLowerCase());
+
+    const matchStatus = filter == "all" ? true : item.status == filter;
+
+    const matchType = docType == "all" ? true : item.type == docType;
+
+    return matchesSearch && matchStatus && matchType;
+  });
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.js file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div className="">
+      <main className="p-6">
+        <div className="text-center">
+          <h1 className="text-2xl font-semibold">Evidence Vault</h1>
+          <p className="text-sm text-gray-500 mt-1">Phase A – Screen A</p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+
+        <div className="flex justify-end gap-3 mt-6 mb-4 ">
+          <input
+            type="text"
+            placeholder="Search documents..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="border px-3 py-2 rounded-md text-sm "
+          />
+
+          <select
+            value={docType}
+            onChange={(e) => setDocType(e.target.value)}
+            className="border px-3 py-2 rounded-md text-sm outline-none"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+            <option value="all">All Types</option>
+            <option value="ISO">ISO</option>
+            <option value="License">License</option>
+            <option value="Safety">Safety</option>
+            <option value="Audit">Audit</option>
+          </select>
+
+          <select
+            value={filter}
+            onChange={(e) => setFilter(e.target.value)}
+            className="border px-3 py-2 rounded-md text-sm  outline-none"
           >
-            Documentation
-          </a>
+            <option value="all">All Status</option>
+            <option value="Active">Active</option>
+            <option value="Expired">Expired</option>
+          </select>
+        </div>
+
+        <div className="mt-6 flex flex-col items-end">
+          <div className="h-10 mb-2">
+            {selectedIds.length > 0 && (
+              <div className="mb-3 text-sm font-bold text-white bg-blue-600 inline-block px-4 py-2 rounded cursor-pointer">
+                Add to Pack ({selectedIds.length} selected)
+              </div>
+            )}
+          </div>
+          <table className="w-full border border-gray-200 border-collapse">
+            <thead className="bg-gray-100">
+              <tr>
+                <th className="px-3 py-2 text-left text-sm font-medium border">
+                  Doc Name
+                </th>
+                <th className="px-3 py-2 text-left text-sm font-medium border">
+                  Doc Type
+                </th>
+                <th className="px-3 py-2 text-left text-sm font-medium border">
+                  Status
+                </th>
+                <th className="px-3 py-2 text-left text-sm font-medium border">
+                  Expiry
+                </th>
+                <th className="px-3 py-2 text-left text-sm font-medium border">
+                  Versions
+                </th>
+                <th className="px-3 py-2 text-left text-sm font-medium border">
+                  Last Updated
+                </th>
+                <th className="px-3 py-2 border text-sm font-medium text-center">
+                  Selected Items
+                  <input
+                    className="cursor-pointer ml-2 "
+                    type="checkbox"
+                    checked={selectedAll}
+                    onChange={toggleAll}
+                  />
+                </th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {filteredEvidence?.map((item) => (
+                <tr key={item.id} className="hover:bg-gray-50">
+                  <td className="px-3 py-2 text-sm border">{item.name}</td>
+                  <td className="px-3 py-2 text-sm border">{item.type}</td>
+                  <td className="px-3 py-2 text-sm border">
+                    <span>
+                      <StatusChip status={item.status} />
+                    </span>
+                  </td>
+                  <td className="px-3 py-2 text-sm border">{item.expiry}</td>
+                  <td className="px-3 py-2 text-sm border">{item.versions}</td>
+                  <td className="px-3 py-2 text-sm border">{item.updatedAt}</td>
+                  <td className="px-3 py-2 border w-40 text-center">
+                    <input
+                      className="cursor-pointer"
+                      type="checkbox"
+                      checked={selectedIds.includes(item.id)}
+                      onChange={() => toggleOne(item.id)}
+                    />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </main>
     </div>
